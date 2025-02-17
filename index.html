@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fireworks and Envelope Animation</title>
-    <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+    <title>Fireworks Animation</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
         body {
             margin: 0;
             overflow: hidden;
@@ -22,146 +22,42 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            pointer-events: none;
         }
         .text-container {
             display: flex;
             font-size: 3rem;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Patrick Hand', cursive;
             color: white;
             text-align: center;
             position: absolute;
-            opacity: 1;
-            transition: opacity 2s ease-in-out;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
         .word {
             display: flex;
-            gap: 5px;
-            margin: 0 15px;
+            gap: 5px; /* Jarak antar huruf */
+            margin: 0 15px; /* Jarak antar kata */
         }
         .letter {
-            display: inline-block; /* Ensure letters are inline */
             opacity: 0;
             animation: fadeIn 2s ease-in-out forwards;
-            background: transparent; /* Remove background color */
         }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        .envlope-wrapper {
-            position: absolute;
-            opacity: 0;
-            transition: opacity 2s ease-in-out;
-        }
-        #envelope {
-            position: relative;
-            width: 280px;
-            height: 180px;
-            border-bottom-left-radius: 6px;
-            border-bottom-right-radius: 6px;
-            background-color: var(--color-flap);
-            box-shadow: 0 4px 20px rgba(255,255,255,.1);
-            cursor: pointer;
-        }
-        .front {
-            position: absolute;
-            width: 0;
-            height: 0;
-        }
-        .flap {
-            border-left: 140px solid transparent;
-            border-right: 140px solid transparent;
-            border-bottom: 82px solid transparent;
-            border-top: 98px solid var(--color-flap);
-            transform-origin: top;
-            pointer-events: none;
-            transition: transform 0.4s ease;
-            z-index: 2;
-        }
-        .pocket {
-            border-left: 140px solid var(--color-env);
-            border-right: 140px solid var(--color-env);
-            border-bottom: 90px solid var(--color-env2);
-            border-top: 90px solid transparent;
-            border-bottom-left-radius: 6px;
-            border-bottom-right-radius: 6px;
-            z-index: 3;
-        }
-        .letter {
-            position: relative;
-            background-color: black;
-            width: 90%;
-            margin: 0 auto;
-            height: 90%;
-            top: 5%;
-            border-radius: 6px;
-            box-shadow: 0 2px 26px rgba(255,255,255,.08);
-            padding: 15px;
-            box-sizing: border-box;
-            transition: transform 0.4s ease;
-            z-index: 1;
-        }
-        .message {
-            position: relative;
-            z-index: 2;
-            font-family: 'Handlee', cursive;
-            color: #000000;
-            text-align: center;
-            line-height: 1;
-            padding-top: 0px;
-        }
-        .message p {
-            margin: 10px 0;
-            font-size: 1.8em;
-            text-shadow: 0 2px 3px rgba(255,255,255,0.1);
-        }
-        .open .flap {
-            transform: rotateX(180deg);
-            transition-delay: 0s;
-            z-index: 1;
-        }
-        .open .letter {
-            transform: translateY(-60px) rotate(-2deg);
-            transition-delay: 0.4s;
-            z-index: 2;
-        }
-        .close .flap {
-            transform: rotateX(0deg);
-            transition-delay: 0.4s;
-            z-index: 2;
-        }
-        .close .letter {
-            transform: translateY(0px);
-            transition-delay: 0s;
-            z-index: 1;
-        }
-        :root {
-            --color-env: #d1d1d1;
-            --color-env2: #bfbfbf;
-            --color-flap: #a8a8a8;
-            --color-bg: #000000;
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
     </style>
 </head>
 <body>
     <canvas id="c"></canvas>
-    <div class="text-container"></div>
-    <div class="envlope-wrapper">
-        <div id="envelope" class="close">
-            <div class="front flap"></div>
-            <div class="front pocket"></div>
-            <div class="letter">
-                <div class="message">
-                    <p>Bangsat kau</p>
-                    <p></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <div class="text-container" id="text-container"></div>
+    
     <script>
-        // Fireworks Animation
         const canvas = document.getElementById("c");
         const ctx = canvas.getContext("2d");
         canvas.width = window.innerWidth;
@@ -288,8 +184,9 @@
 
         animate();
 
-        // Text Animation
+        // Fungsi untuk memecah kata menjadi huruf dan menerapkan animasi fade-in secara random
         function createTextEffect(text, container) {
+            container.innerHTML = ""; // Clear existing content
             text.split(" ").forEach(word => {
                 let wordSpan = document.createElement("span");
                 wordSpan.classList.add("word");
@@ -305,39 +202,44 @@
             });
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const textContainer = document.querySelector(".text-container");
-            createTextEffect("Bangsat kau", textContainer);
-            
-            const letters = document.querySelectorAll(".letter");
+        // Fungsi untuk fade out teks
+        function fadeOutText(container, callback) {
+            const letters = container.querySelectorAll(".letter");
             letters.forEach(letter => {
-                const delay = Math.random() * 2 + 0.5;
+                letter.style.animation = `fadeOut 2s ease-in-out forwards`;
+            });
+            setTimeout(callback, 2000); // Wait for fade out to complete
+        }
+
+        // Fungsi untuk fade in teks
+        function fadeInText(text, container) {
+            createTextEffect(text, container);
+            const letters = container.querySelectorAll(".letter");
+            letters.forEach(letter => {
+                const delay = Math.random() * 2 + 0.5; // Delay random antara 0.5 - 2.5 detik
+                letter.style.animation = `fadeIn 2s ease-in-out forwards`;
+                letter.style.animationDelay = `${delay}s`;
+            });
+        }
+
+        // Menambahkan teks dengan animasi fade-in random per huruf
+        document.addEventListener("DOMContentLoaded", () => {
+            const textContainer = document.getElementById("text-container");
+            createTextEffect("Happy Birthday, Cynthia", textContainer);
+            
+            const letters = textContainer.querySelectorAll(".letter");
+            letters.forEach(letter => {
+                const delay = Math.random() * 2 + 0.5; // Delay random antara 0.5 - 2.5 detik
                 letter.style.animation = `fadeIn 2s ease-in-out forwards`;
                 letter.style.animationDelay = `${delay}s`;
             });
 
-            // Wait for text animation to finish (2s animation + 5s delay)
+            // Set timeout untuk fade out dan kemudian fade in teks baru
             setTimeout(() => {
-                textContainer.style.opacity = 0; // Fade out text
-                setTimeout(() => {
-                    document.querySelector(".envlope-wrapper").style.opacity = 1; // Fade in envelope
-                }, 2000); // Crossfade duration
-            }, 7000); // 2s animation + 5s delay
-        });
-
-        // Envelope Interaction
-        document.addEventListener("DOMContentLoaded", function() {
-            const envelope = document.getElementById("envelope");
-
-            envelope.addEventListener("click", function() {
-                if (envelope.classList.contains("close")) {
-                    envelope.classList.remove("close");
-                    envelope.classList.add("open");
-                } else {
-                    envelope.classList.remove("open");
-                    envelope.classList.add("close");
-                }
-            });
+                fadeOutText(textContainer, () => {
+                    fadeInText("Best regards, Hikmat", textContainer);
+                });
+            }, 5000); // Tunggu 5 detik sebelum memulai fade out
         });
     </script>
 </body>
